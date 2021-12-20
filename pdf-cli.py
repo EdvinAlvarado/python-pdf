@@ -27,53 +27,48 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 
 assert sys.version_info >= (3,10), "must be Pyton 3.10 or newer"
 
-def main(arg: list[str]) -> int:
-    if len(arg) < 2:
-        return 1
-
+def main(arg: list[str]) -> None:
     match arg[1]:
         case "merge":
-            merge(*arg[2:])
-            return 0
+            merge()
         case "split":
-            split(*arg[2:])
-            return 0
+            split()
         case "rotate":
-            rotate(*arg[2:-1], rotation=int(arg[-1]))
-            return 0
-        case _:
-            print("Not a supported command")
-            return 2
-
-    return 1
+            rotate()
 
 
-def rotate(*pdfs: str, rotation: int) -> None:
-    for pdf in pdfs:
-        input_pdf = PdfFileReader(open(f"{pdf}", "rb"))
-        output_pdf = PdfFileWriter()
+def rotate() -> None:
+    filename = input("File Name: ")
+    rotation = int(input("How much to rotate in degrees: "))
 
-        for i in range(input_pdf.numPages):
-            output_pdf.addPage(input_pdf.getPage(i).rotateClockwise(rotation))
-        
-        with open(f"{pdf}", "wb") as outputStream:
-            output_pdf.write(outputStream)
-
-def split(*pdfs: str) -> None:
-
-    for pdf in pdfs:
-        inputpdf = PdfFileReader(open(f"{pdf}", "rb"))
-
-        for i in range(inputpdf.numPages):
-            output = PdfFileWriter()
-            output.addPage(inputpdf.getPage(i))
-            with open(f"{pdf.split('.')[0]}_%s.pdf" % i, "wb") as outputStream:
-                output.write(outputStream)
-
-def merge(*pdfs: str) -> None:
+    inputpdf = PdfFileReader(open(f"{filename}.pdf", "rb"))
     output = PdfFileWriter()
-    for pdf in pdfs:
-        inputpdf = PdfFileReader(open(f"{pdf}", "rb"))
+
+    for i in range(inputpdf.numPages):
+        output.addPage(inputpdf.getPage(i).rotateClockwise(rotation))
+
+    with open(f"{filename}_rotated.pdf", "wb") as outputStream:
+        output.write(outputStream)
+
+def split() -> None:
+    filename = input("File Name: ")
+
+    inputpdf = PdfFileReader(open(f"{filename}.pdf", "rb"))
+
+    for i in range(inputpdf.numPages):
+        output = PdfFileWriter()
+        output.addPage(inputpdf.getPage(i))
+        with open(f"{filename}_%s.pdf" % i, "wb") as outputStream:
+            output.write(outputStream)
+
+def merge() -> None:
+    output = PdfFileWriter()
+
+    while True:
+        filename = input("File Name: ")
+        if filename == "":
+            break
+        inputpdf = PdfFileReader(open(f"{filename}.pdf", "rb"))
         for i in range(inputpdf.numPages):
             output.addPage(inputpdf.getPage(i))
 
